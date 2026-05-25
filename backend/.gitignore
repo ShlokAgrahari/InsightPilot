@@ -1,0 +1,42 @@
+# dependencies
+node_modules/
+
+# environment variables
+.env
+
+# uploads
+uploads/
+
+# logs
+logs/
+*.log
+npm-debug.log*
+
+# temporary files
+tmp/
+temp/
+
+# build
+dist/
+build/
+
+# coverage
+coverage/
+
+# editor files
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# langsmith traces/cache
+.langchain/
+.langsmith/
+
+# vector cache
+*.bin
+*.sqlite
+
+# OS files
+Thumbs.db
