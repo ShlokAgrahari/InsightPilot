@@ -1,31 +1,59 @@
 import fs from "fs";
-import { createRequire } from 'module';
+import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
-const pdfParse = require('pdf-parse');
+
+const pdfParse = require("pdf-parse");
 
 const parsePDF = async (filePath) => {
-    // 1. Check if file exists and has size
-    const stats = fs.statSync(filePath);
-    if (stats.size === 0) {
-        throw new Error("File is empty (0 bytes)");
-    }
 
-    // 2. Read the file into a buffer
-    const dataBuffer = fs.readFileSync(filePath);
-
-    // 3. Verify buffer has content
-    if (!dataBuffer || dataBuffer.length === 0) {
-        throw new Error("Buffer is empty");
-    }
-
-    // 4. Parse
     try {
-        const data = await pdfParse(dataBuffer);
+
+        const stats =
+            await fs.promises.stat(filePath);
+
+        if (stats.size === 0) {
+
+            throw new Error(
+                "PDF file is empty"
+            );
+        }
+
+        const dataBuffer =
+            await fs.promises.readFile(
+                filePath
+            );
+
+        if (
+            !dataBuffer ||
+            dataBuffer.length === 0
+        ) {
+
+            throw new Error(
+                "PDF buffer empty"
+            );
+        }
+
+        const data =
+            await pdfParse(dataBuffer);
+
+        if (!data.text?.trim()) {
+
+            throw new Error(
+                "No extractable text found"
+            );
+        }
+
         return data.text;
-    } catch (err) {
-        console.error("PDF Parse Library Error:", err);
-        throw err;
+
+    } catch (error) {
+
+        console.log(
+            "PDF Parsing Error:",
+            error
+        );
+
+        throw error;
     }
 };
 

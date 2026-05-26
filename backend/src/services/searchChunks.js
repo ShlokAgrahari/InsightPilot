@@ -1,7 +1,9 @@
 import client from "../config/weaviate.js";
 import embedText from "./embedText.js";
 
-const searchChunks = async (query) => {
+const searchChunks = async (
+    query
+) => {
 
     try {
 
@@ -14,17 +16,20 @@ const searchChunks = async (query) => {
             await embedText(query);
 
         const response =
-            await collection.query.nearVector(
-                queryEmbedding,
+            await collection.query.hybrid(
+                query,
                 {
-                    limit: 5,
-                    returnMetadata: ["distance"]
+                    vector: queryEmbedding,
+
+                    alpha: 0.7,
+
+                    limit: 5
                 }
             );
 
         console.log(
             JSON.stringify(
-                response,
+                response.objects,
                 null,
                 2
             )
