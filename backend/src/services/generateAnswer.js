@@ -1,53 +1,99 @@
-import groq from "../config/groq.js";
+import groq from
+"../config/groq.js";
 
 const generateAnswer = async (
+
     query,
+
     chunks
+
 ) => {
 
     try {
 
-        const formattedContext =
-            chunks.map((item, index) => {
+        const internalDocs =
+            chunks.filter(
 
-                return `
-[C${index + 1}]
-${item.properties.text}
-`;
-            }).join("\n\n");
+                (item) =>
+
+                    item.properties
+                    .source !== "web"
+            );
+
+        const webDocs =
+            chunks.filter(
+
+                (item) =>
+
+                    item.properties
+                    .source === "web"
+            );
+
+        const internalContext =
+            internalDocs.map(
+
+                (item, index) =>
+
+                    `[C${index + 1}]
+${item.properties.text}`
+
+            ).join("\n\n");
+
+        const webContext =
+            webDocs.map(
+
+                (item, index) =>
+
+                    `[W${index + 1}]
+${item.properties.text}`
+
+            ).join("\n\n");
 
         const prompt = `
-You are a helpful AI assistant.
 
-Answer ONLY using the provided context.
+You are an AI research assistant.
 
-RULES:
-1. Every important statement MUST include citation.
-2. Use citations like [C1], [C2].
-3. Do NOT make up information.
-4. If answer not found, say:
-"Information not found in documents."
+Use BOTH:
+1. Internal documents
+2. Web results
 
-CONTEXT:
-${formattedContext}
+when relevant.
+
+If comparison is requested,
+analyze both carefully.
+
+INTERNAL DOCUMENTS:
+${internalContext}
+
+WEB RESULTS:
+${webContext}
 
 QUESTION:
 ${query}
+
+Instructions:
+- Give detailed answer
+- Use citations
+- Compare intelligently
+- Do not hallucinate
 `;
 
         const response =
             await groq.chat.completions.create({
 
-                model: "llama-3.3-70b-versatile",
+                model:
+                "llama-3.3-70b-versatile",
 
                 messages: [
+
                     {
                         role: "user",
+
                         content: prompt
                     }
                 ],
 
-                temperature: 0.2
+                temperature: 0.3
             });
 
         return response.choices[0]
