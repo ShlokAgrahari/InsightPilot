@@ -1,6 +1,7 @@
 import searchChunks from "../services/searchChunks.js";
 import generateAnswer from "../services/generateAnswer.js";
-
+import rerankerAgent
+from "../agents/rerankerAgent.js";
 export const chatWithDocs = async (
     req,
     res
@@ -18,28 +19,50 @@ export const chatWithDocs = async (
             });
         }
 
-        const results =
-            await searchChunks(query);
+        const retrievedChunks =
+    await searchChunks(query);
 
-        const answer =
-            await generateAnswer(
-                query,
-                results
-            );
+const rerankedChunks =
+    await rerankerAgent(
+        query,
+        retrievedChunks
+    );
 
+const answer =
+    await generateAnswer(
+        query,
+        rerankedChunks
+    );
         res.status(200).json({
-            success: true,
-            answer,
-            retrievedChunks: results
-        });
+    success: true,
 
+    answer,
+
+    citations: rerankedChunks.map(
+        (item, index) => ({
+            citation: `C${index + 1}`,
+
+            source:
+                item.properties.source,
+
+            text:
+                item.properties.text
+        })
+    )
+});
     } catch (error) {
 
-        console.log(error);
+    console.log(
+        "CHAT ERROR:",
+        error
+    );
 
-        res.status(500).json({
-            success: false,
-            message: "Server Error"
-        });
-    }
+    res.status(500).json({
+        success: false,
+
+        message: error.message,
+
+        error
+    });
+}
 };

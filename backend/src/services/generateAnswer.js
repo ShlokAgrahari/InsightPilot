@@ -7,25 +7,31 @@ const generateAnswer = async (
 
     try {
 
-        const context = chunks
-            .map((item) =>
-                item.properties.text
-            )
-            .join("\n\n");
+        const formattedContext =
+            chunks.map((item, index) => {
+
+                return `
+[C${index + 1}]
+${item.properties.text}
+`;
+            }).join("\n\n");
 
         const prompt = `
 You are a helpful AI assistant.
 
-Answer ONLY from the provided context.
+Answer ONLY using the provided context.
 
-If answer is not available,
-say:
+RULES:
+1. Every important statement MUST include citation.
+2. Use citations like [C1], [C2].
+3. Do NOT make up information.
+4. If answer not found, say:
 "Information not found in documents."
 
-Context:
-${context}
+CONTEXT:
+${formattedContext}
 
-Question:
+QUESTION:
 ${query}
 `;
 
@@ -41,7 +47,7 @@ ${query}
                     }
                 ],
 
-                temperature: 0.3
+                temperature: 0.2
             });
 
         return response.choices[0]
