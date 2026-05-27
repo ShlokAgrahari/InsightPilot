@@ -1,9 +1,41 @@
 import express from "express";
-import upload from "../middleware/uploadMiddleware.js";
-import { uploadDocument } from "../controllers/uploadController.js";
 
-const router = express.Router();
+import authMiddleware
+from "../middleware/authMiddleware.js";
 
-router.post("/", upload.single("file"), uploadDocument);
+import upload from
+"../middleware/uploadMiddleware.js";
 
-export default router;
+import {
+
+  uploadDocument,
+
+  getDocuments
+
+} from
+"../controllers/uploadController.js";
+
+const uploadRouter =
+express.Router();
+
+uploadRouter.post(
+
+  "/upload",
+
+  authMiddleware,
+
+  upload.single("pdf"),
+
+  uploadDocument
+);
+
+uploadRouter.get(
+
+  "/",
+
+  authMiddleware,
+
+  getDocuments
+);
+
+export default uploadRouter;
