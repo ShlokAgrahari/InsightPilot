@@ -5,6 +5,7 @@ import connectDB from "./src/config/db.js";
 import uploadRoutes from "./src/routes/uploadRoutes.js"; 
 import initWeaviate from "./src/services/initWeaviate.js";
 import chatRoutes from "./src/routes/chatRoutes.js";
+import authRouter from "./src/routes/authRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -28,3 +29,5 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server running on ${PORT}`);
 });
+
+app.use("/api/auth",authRouter);
