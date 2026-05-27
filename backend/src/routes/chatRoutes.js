@@ -1,10 +1,22 @@
 import express from "express";
+
 import {
-    chatWithDocs
+  chatWithDocs
 } from "../controllers/chatController.js";
 
-const router = express.Router();
+import authMiddleware
+from "../middleware/authMiddleware.js";
 
-router.post("/", chatWithDocs);
+const chatRouter =
+express.Router();
 
-export default router;
+chatRouter.post(
+
+  "/",
+
+  authMiddleware,
+
+  chatWithDocs
+);
+
+export default chatRouter;

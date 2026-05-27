@@ -1,9 +1,15 @@
 import client from "../config/weaviate.js";
 
 const storeChunks = async (
+
     chunks,
+
     embeddings,
-    fileName
+
+    fileName,
+
+    userId
+
 ) => {
 
     try {
@@ -13,17 +19,29 @@ const storeChunks = async (
                 "Documents"
             );
 
-        for (let i = 0; i < chunks.length; i++) {
+        for (
+            let i = 0;
+            i < chunks.length;
+            i++
+        ) {
 
             await collection.data.insert({
 
                 properties: {
-                    text: chunks[i],
-                    source: fileName
+
+                    text:
+                    chunks[i],
+
+                    source:
+                    fileName,
+
+                    userId
                 },
 
                 vectors: {
-                    default: embeddings[i]
+
+                    default:
+                    embeddings[i]
                 }
             });
         }

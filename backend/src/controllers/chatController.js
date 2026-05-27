@@ -20,11 +20,14 @@ async (req, res) => {
             });
         }
 
-        const result =
-            await graph.invoke({
+       const result =
+await graph.invoke({
 
-                query
-            });
+    query,
+
+    userId:
+    req.user._id.toString()
+});
 
         res.status(200).json({
 

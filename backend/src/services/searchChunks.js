@@ -2,28 +2,42 @@ import client from "../config/weaviate.js";
 import embedText from "./embedText.js";
 
 const searchChunks = async (
-    query
+    query,
+    userId
 ) => {
-
     try {
 
+        // Generate query embedding
+        const queryEmbedding =
+            await embedText(query);
+
+        console.log(
+            "Query Embedding Generated"
+        );
+
+        // Get collection
         const collection =
             client.collections.get(
                 "Documents"
             );
 
-        const queryEmbedding =
-            await embedText(query);
-
+        // Hybrid Search
         const response =
             await collection.query.hybrid(
                 query,
                 {
                     vector: queryEmbedding,
 
+                    // BM25 + Vector balance
                     alpha: 0.7,
 
-                    limit: 5
+                    limit: 5,
+
+                    // Filter by user
+                    filters:
+                        collection.filter
+                            .byProperty("userId")
+                            .equal(userId)
                 }
             );
 
@@ -39,7 +53,10 @@ const searchChunks = async (
 
     } catch (error) {
 
-        console.log(error);
+        console.log(
+            "Hybrid Search Error:",
+            error
+        );
 
         throw error;
     }

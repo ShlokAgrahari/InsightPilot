@@ -1,42 +1,60 @@
-import weaviate from "weaviate-client";
-import client from "../config/weaviate.js";
+import client from
+"../config/weaviate.js";
 
-const initWeaviate = async () => {
+const initWeaviate =
+async () => {
 
-    const exists =
-        await client.collections.exists(
-            "Documents"
-        );
+    try {
 
-    if (!exists) {
+        const exists =
+        await client.collections
+        .exists("Documents");
 
-        await client.collections.create({
+        if (exists) {
+
+            console.log(
+                "Documents collection already exists"
+            );
+
+            return;
+        }
+
+        await client.collections
+        .create({
 
             name: "Documents",
 
-            vectorizers: weaviate.configure.vectorizer.none(),
-
             properties: [
+
                 {
                     name: "text",
+
                     dataType: "text"
                 },
+
                 {
                     name: "source",
+
+                    dataType: "text"
+                },
+
+                {
+                    name: "userId",
+
                     dataType: "text"
                 }
-            ]
+            ],
+
+            vectorizers: []
         });
 
         console.log(
             "Documents collection created"
         );
 
-    } else {
+    } catch (error) {
 
-        console.log(
-            "Documents collection already exists"
-        );
+        console.log(error);
     }
 };
 

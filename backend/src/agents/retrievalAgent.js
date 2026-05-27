@@ -11,7 +11,8 @@ const retrievalAgent = async (
 
     const retrievedChunks =
         await searchChunks(
-            state.query
+            state.query,
+            state.userId
         );
 
     console.log(

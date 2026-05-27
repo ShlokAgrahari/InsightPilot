@@ -51,7 +51,9 @@ const workflow = new StateGraph({
 
         finalAnswer: null,
 
-        chatHistory: null
+        chatHistory: null,
+
+        userId: null
     }
 });
 

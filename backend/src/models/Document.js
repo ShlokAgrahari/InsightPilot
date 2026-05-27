@@ -1,4 +1,5 @@
-import mongoose from "mongoose";
+import mongoose from
+"mongoose";
 
 const documentSchema =
 new mongoose.Schema({
@@ -6,23 +7,37 @@ new mongoose.Schema({
     user: {
 
         type:
-            mongoose.Schema.Types.ObjectId,
+        mongoose.Schema.Types.ObjectId,
 
-        ref: "User"
+        ref: "User",
+
+        required: true
     },
 
-    fileName: String,
+    fileName: {
 
-    cloudinaryUrl: String,
+        type: String,
 
-    publicId: String,
+        required: true
+    },
 
-    uploadedAt: {
+    cloudinaryUrl: {
 
-        type: Date,
+        type: String,
 
-        default: Date.now
+        required: true
+    },
+
+    publicId: {
+
+        type: String,
+
+        required: true
     }
+
+}, {
+
+    timestamps: true
 });
 
 export default mongoose.model(
