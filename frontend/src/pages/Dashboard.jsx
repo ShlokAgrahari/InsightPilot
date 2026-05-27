@@ -1,3 +1,7 @@
+import {
+    useState
+} from "react";
+
 import Sidebar from
 "../components/Sidebar";
 
@@ -8,6 +12,13 @@ import AgentPanel from
 "../components/AgentPanel";
 
 const Dashboard = () => {
+
+    const [
+        agentLogs,
+
+        setAgentLogs
+
+    ] = useState([]);
 
     return (
 
@@ -21,9 +32,19 @@ const Dashboard = () => {
 
             <Sidebar />
 
-            <ChatSection />
+            <ChatSection
 
-            <AgentPanel />
+                setAgentLogs={
+                    setAgentLogs
+                }
+            />
+
+            <AgentPanel
+
+                agentLogs={
+                    agentLogs
+                }
+            />
 
         </div>
     );

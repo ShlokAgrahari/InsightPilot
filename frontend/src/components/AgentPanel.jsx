@@ -11,7 +11,59 @@ const agents = [
     "Citation Validator"
 ];
 
-const AgentPanel = () => {
+const AgentPanel = ({
+    agentLogs
+}) => {
+
+    const getStatus =
+    (agentName) => {
+
+        const found =
+        agentLogs?.find(
+
+            (item) =>
+
+                item.agent ===
+                agentName
+        );
+
+        return found?.status
+        || "waiting";
+    };
+
+    const getColor =
+    (status) => {
+
+        if (
+            status ===
+            "completed"
+        ) {
+
+            return
+            "bg-green-500";
+        }
+
+        if (
+            status ===
+            "running"
+        ) {
+
+            return
+            "bg-yellow-500";
+        }
+
+        if (
+            status ===
+            "skipped"
+        ) {
+
+            return
+            "bg-slate-500";
+        }
+
+        return
+        "bg-blue-500";
+    };
 
     return (
 
@@ -37,7 +89,12 @@ const AgentPanel = () => {
             ">
 
                 {agents.map(
-                    (agent) => (
+                    (agent) => {
+
+                    const status =
+                    getStatus(agent);
+
+                    return (
 
                     <div
                     key={agent}
@@ -59,12 +116,12 @@ const AgentPanel = () => {
                                 {agent}
                             </h3>
 
-                            <div className="
+                            <div className={`
                             h-3
                             w-3
                             rounded-full
-                            bg-green-500
-                            ">
+                            ${getColor(status)}
+                            `}>
 
                             </div>
 
@@ -74,13 +131,15 @@ const AgentPanel = () => {
                         text-sm
                         text-slate-400
                         mt-2
+                        capitalize
                         ">
 
-                            Ready
+                            {status}
+
                         </p>
 
                     </div>
-                ))}
+                )})}
 
             </div>
 
