@@ -1,26 +1,38 @@
+import {
+    traceable
+} from "langsmith/traceable";
+
 import generateAnswer from
 "../services/generateAnswer.js";
 
-const answerAgent = async (
-    state
-) => {
+const answerAgent = traceable(
 
-    console.log(
-        "Answer Agent Running"
-    );
+    async (
+        state
+    ) => {
 
-    const answer =
-        await generateAnswer(
-
-            state.query,
-
-            state.rerankedChunks
+        console.log(
+            "Answer Agent Running"
         );
 
-    return {
+        const answer =
+            await generateAnswer(
 
-        finalAnswer: answer
-    };
-};
+                state.query,
+
+                state.rerankedChunks
+            );
+
+        return {
+
+            finalAnswer: answer
+        };
+    },
+
+    {
+        name:
+            "Answer Agent"
+    }
+);
 
 export default answerAgent;

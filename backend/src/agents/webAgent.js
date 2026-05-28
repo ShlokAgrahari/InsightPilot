@@ -1,50 +1,62 @@
+import {
+    traceable
+} from "langsmith/traceable";
+
 import tavilyClient from
 "../config/tavily.js";
 
-const webAgent = async (
-    state
-) => {
+const webAgent = traceable(
 
-    console.log(
-        "Web Agent Started"
-    );
+    async (
+        state
+    ) => {
 
-    const response =
-        await tavilyClient.search(
-
-            state.query,
-
-            {
-                searchDepth:
-                    "advanced",
-
-                maxResults: 3
-            }
+        console.log(
+            "Web Agent Started"
         );
 
-    console.log(
-        "Web Agent Finished"
-    );
+        const response =
+            await tavilyClient.search(
 
-    const webResults =
-        response.results.map(
-            (item) => ({
+                state.query,
 
-                properties: {
+                {
+                    searchDepth:
+                        "advanced",
 
-                    source:
-                        item.url,
-
-                    text:
-                        item.content
+                    maxResults: 3
                 }
-            })
+            );
+
+        console.log(
+            "Web Agent Finished"
         );
 
-    return {
+        const webResults =
+            response.results.map(
+                (item) => ({
 
-        webResults
-    };
-};
+                    properties: {
+
+                        source:
+                            item.url,
+
+                        text:
+                            item.content
+                    }
+                })
+            );
+
+        return {
+
+            webResults
+        };
+    },
+
+    {
+        name:
+            "Web Agent"
+    }
+);
 
 export default webAgent;

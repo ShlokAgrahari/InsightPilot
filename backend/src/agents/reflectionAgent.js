@@ -1,15 +1,21 @@
+import {
+    traceable
+} from "langsmith/traceable";
+
 import groq from "../config/groq.js";
 
-const reflectionAgent = async (
-    state,
-    context
-) => {
+const reflectionAgent = traceable(
 
-    console.log(
-        "Reflection Agent Running"
-    );
+    async (
+        state,
+        context
+    ) => {
 
-    const prompt = `
+        console.log(
+            "Reflection Agent Running"
+        );
+
+        const prompt = `
 
 You are an elite AI response refinement agent for a RAG system.
 
@@ -59,27 +65,33 @@ ${state.finalAnswer}
 
 `;
 
-    const response =
-        await groq.chat.completions.create({
+        const response =
+            await groq.chat.completions.create({
 
-            model:
-                "llama-3.3-70b-versatile",
+                model:
+                    "llama-3.3-70b-versatile",
 
-            messages: [
-                {
-                    role: "user",
-                    content: prompt
-                }
-            ],
+                messages: [
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ],
 
-            temperature: 0.1
-        });
+                temperature: 0.1
+            });
 
-    return {
-        finalAnswer:
-            response.choices[0]
-                .message.content
-    };
-};
+        return {
+            finalAnswer:
+                response.choices[0]
+                    .message.content
+        };
+    },
+
+    {
+        name:
+            "Reflection Agent"
+    }
+);
 
 export default reflectionAgent;

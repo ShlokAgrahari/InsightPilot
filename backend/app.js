@@ -1,5 +1,7 @@
-import express from "express";
 import dotenv from "dotenv";
+dotenv.config();
+
+import express from "express";
 import cors from "cors";
 
 import connectDB from "./src/config/db.js";
@@ -10,7 +12,6 @@ import authRouter from "./src/routes/authRoutes.js";
 
 import initWeaviate from "./src/services/initWeaviate.js";
 import documentRoutes from "./src/routes/documentRoutes.js";
-dotenv.config();
 
 const app = express();
 
@@ -21,7 +22,6 @@ await initWeaviate();
 app.use(cors());
 
 app.use(express.json());
-
 
 // ROUTES
 app.use(
@@ -38,15 +38,15 @@ app.use(
   "/api/documents",
   uploadRouter
 );
+
 app.use(
-    "/api/documents",
-    documentRoutes
+  "/api/documents",
+  documentRoutes
 );
 
 app.get("/", (req, res) => {
   res.send("API Running");
 });
-
 
 const PORT =
 process.env.PORT || 5000;

@@ -1,24 +1,30 @@
+import {
+    traceable
+} from "langsmith/traceable";
+
 import groq from
 "../config/groq.js";
 
 const citationValidatorAgent =
-async (state) => {
+traceable(
 
-    console.log(
-        "Citation Validator Running"
-    );
+    async (state) => {
 
-    const context =
-        state.rerankedChunks.map(
+        console.log(
+            "Citation Validator Running"
+        );
 
-            (item, index) =>
+        const context =
+            state.rerankedChunks.map(
 
-                `[C${index + 1}]
+                (item, index) =>
+
+                    `[C${index + 1}]
 ${item.properties.text}`
 
-        ).join("\n\n");
+            ).join("\n\n");
 
-    const prompt = `
+        const prompt = `
 
 You are an AI citation validator.
 
@@ -41,31 +47,37 @@ ANSWER:
 ${state.finalAnswer}
 `;
 
-    const response =
-        await groq.chat.completions.create({
+        const response =
+            await groq.chat.completions.create({
 
-            model:
-            "llama-3.3-70b-versatile",
+                model:
+                "llama-3.3-70b-versatile",
 
-            messages: [
+                messages: [
 
-                {
-                    role: "user",
+                    {
+                        role: "user",
 
-                    content: prompt
-                }
-            ],
+                        content: prompt
+                    }
+                ],
 
-            temperature: 0.2
-        });
+                temperature: 0.2
+            });
 
-    return {
+        return {
 
-        finalAnswer:
-            response.choices[0]
-            .message.content
-    };
-};
+            finalAnswer:
+                response.choices[0]
+                .message.content
+        };
+    },
+
+    {
+        name:
+            "Citation Validator Agent"
+    }
+);
 
 export default
 citationValidatorAgent;
