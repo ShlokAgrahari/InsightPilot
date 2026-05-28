@@ -1,28 +1,40 @@
-const mergeAgent = async (
-    state
-) => {
+import {
+    traceable
+} from "langsmith/traceable";
 
-    console.log(
-        "Merge Agent Running"
-    );
+const mergeAgent = traceable(
 
-    const retrieved =
-        state.retrievedChunks || [];
+    async (
+        state
+    ) => {
 
-    const web =
-        state.webResults || [];
+        console.log(
+            "Merge Agent Running"
+        );
 
-    const mergedResults = [
+        const retrieved =
+            state.retrievedChunks || [];
 
-        ...retrieved,
+        const web =
+            state.webResults || [];
 
-        ...web
-    ];
+        const mergedResults = [
 
-    return {
+            ...retrieved,
 
-        mergedResults
-    };
-};
+            ...web
+        ];
+
+        return {
+
+            mergedResults
+        };
+    },
+
+    {
+        name:
+            "Merge Agent"
+    }
+);
 
 export default mergeAgent;

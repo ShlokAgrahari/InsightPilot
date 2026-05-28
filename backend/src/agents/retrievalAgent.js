@@ -1,28 +1,40 @@
-import searchChunks from
+import {
+    traceable
+} from "langsmith/traceable";
+
+import searchChunks from 
 "../services/searchChunks.js";
 
-const retrievalAgent = async (
-    state
-) => {
+const retrievalAgent = traceable(
 
-    console.log(
-        "Retrieval Started"
-    );
+    async (
+        state
+    ) => {
 
-    const retrievedChunks =
-        await searchChunks(
-            state.query,
-            state.userId
+        console.log(
+            "Retrieval Started"
         );
 
-    console.log(
-        "Retrieval Finished"
-    );
+        const retrievedChunks =
+            await searchChunks(
+                state.query,
+                state.userId
+            );
 
-    return {
+        console.log(
+            "Retrieval Finished"
+        );
 
-        retrievedChunks
-    };
-};
+        return {
+
+            retrievedChunks
+        };
+    },
+
+    {
+        name:
+            "Retrieval Agent"
+    }
+);
 
 export default retrievalAgent;

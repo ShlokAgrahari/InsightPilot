@@ -1,26 +1,38 @@
-import rerankerAgent from
+import {
+    traceable
+} from "langsmith/traceable";
+
+import rerankerAgent from 
 "./rerankerAgent.js";
 
 const rerankerAgentNode =
-async (state) => {
+traceable(
 
-    console.log(
-        "Reranker Agent Running"
-    );
+    async (state) => {
 
-    const rerankedChunks =
-        await rerankerAgent(
-
-            state.query,
-
-            state.mergedResults
+        console.log(
+            "Reranker Agent Running"
         );
 
-    return {
+        const rerankedChunks =
+            await rerankerAgent(
 
-        rerankedChunks
-    };
-};
+                state.query,
+
+                state.mergedResults
+            );
+
+        return {
+
+            rerankedChunks
+        };
+    },
+
+    {
+        name:
+            "Reranker Agent"
+    }
+);
 
 export default
 rerankerAgentNode;
