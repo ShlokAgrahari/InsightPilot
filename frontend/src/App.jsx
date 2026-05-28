@@ -16,6 +16,8 @@ import Dashboard from
 import { Toaster }
 from "react-hot-toast";
 
+import LandingPage from
+"./pages/LandingPage";
 function App() {
 
 return (
@@ -26,20 +28,25 @@ return (
 
 <Routes>
 
-<Route
-path="/signup"
-element={<Signup />}
-/>
+  <Route
+    path="/"
+    element={<LandingPage />}
+  />
 
-<Route
-path="/login"
-element={<Login />}
-/>
+  <Route
+    path="/login"
+    element={<Login />}
+  />
 
-<Route
-path="/dashboard"
-element={<Dashboard />}
-/>
+  <Route
+    path="/signup"
+    element={<Signup />}
+  />
+
+  <Route
+    path="/dashboard"
+    element={<Dashboard />}
+  />
 
 </Routes>
 

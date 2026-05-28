@@ -9,7 +9,7 @@ import chatRouter from "./src/routes/chatRoutes.js";
 import authRouter from "./src/routes/authRoutes.js";
 
 import initWeaviate from "./src/services/initWeaviate.js";
-
+import documentRoutes from "./src/routes/documentRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -38,7 +38,10 @@ app.use(
   "/api/documents",
   uploadRouter
 );
-
+app.use(
+    "/api/documents",
+    documentRoutes
+);
 
 app.get("/", (req, res) => {
   res.send("API Running");

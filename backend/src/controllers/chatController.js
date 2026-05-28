@@ -20,14 +20,14 @@ async (req, res) => {
             });
         }
 
-       const result =
-await graph.invoke({
+        const result =
+        await graph.invoke({
 
-    query,
+            query,
 
-    userId:
-    req.user._id.toString()
-});
+            userId:
+            req.user._id.toString()
+        });
 
         res.status(200).json({
 
@@ -37,7 +37,7 @@ await graph.invoke({
                 result.finalAnswer,
 
             citations:
-                result.rerankedChunks.map(
+                result.rerankedChunks?.map(
 
                     (item, index) => ({
 
@@ -50,10 +50,57 @@ await graph.invoke({
                         text:
                             item.properties.text
                     })
-                ),
+                ) || [],
 
             webResults:
-                result.webResults
+                result.webResults,
+
+            agentLogs: [
+
+                {
+                    agent:
+                    "Supervisor Agent",
+
+                    status:
+                    "completed"
+                },
+
+                {
+                    agent:
+                    "Retrieval Agent",
+
+                    status:
+                    result.retrievedChunks
+                    ? "completed"
+                    : "skipped"
+                },
+
+                {
+                    agent:
+                    "Web Agent",
+
+                    status:
+                    result.webResults
+                    ? "completed"
+                    : "skipped"
+                },
+
+                {
+                    agent:
+                    "Reflection Agent",
+
+                    status:
+                    "completed"
+                },
+
+                {
+                    agent:
+                    "Citation Validator",
+
+                    status:
+                    "completed"
+                }
+            ]
         });
 
     } catch (error) {

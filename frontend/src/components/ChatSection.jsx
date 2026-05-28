@@ -15,7 +15,9 @@ import api from
 import toast from
 "react-hot-toast";
 
-const ChatSection = () => {
+const ChatSection = ({
+  setAgentLogs
+}) => {
 
   const [query,
   setQuery] =
@@ -66,6 +68,11 @@ const ChatSection = () => {
       );
 
       console.log(res.data);
+
+      // UPDATE AGENT STATUS
+      setAgentLogs(
+        res.data.agentLogs || []
+      );
 
       const botMessage = {
 

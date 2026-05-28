@@ -2,7 +2,8 @@ import {
   LogOut,
   FileText,
   Upload,
-  Loader2
+  Loader2,
+  Trash2
 } from "lucide-react";
 
 import {
@@ -10,6 +11,10 @@ import {
   useState,
   useEffect
 } from "react";
+
+import {
+  useNavigate
+} from "react-router-dom";
 
 import toast from "react-hot-toast";
 
@@ -19,6 +24,9 @@ import useAuthStore
 from "../store/authStore";
 
 const Sidebar = () => {
+
+  const navigate =
+  useNavigate();
 
   const user =
   JSON.parse(
@@ -73,7 +81,7 @@ const Sidebar = () => {
   };
 
 
-  // LOAD DOCS ON PAGE LOAD
+  // LOAD DOCS
   useEffect(() => {
 
     fetchDocuments();
@@ -81,7 +89,7 @@ const Sidebar = () => {
   }, []);
 
 
-  // HANDLE PDF UPLOAD
+  // UPLOAD PDF
   const handleUpload =
   async (e) => {
 
@@ -96,7 +104,6 @@ const Sidebar = () => {
 
       setLoading(true);
 
-      // UPLOAD EACH FILE
       for (const file of files) {
 
         const formData =
@@ -128,7 +135,6 @@ const Sidebar = () => {
         );
       }
 
-      // REFRESH DOCUMENTS
       await fetchDocuments();
 
       toast.success(
@@ -152,10 +158,40 @@ const Sidebar = () => {
   };
 
 
+  // DELETE DOCUMENT
+  const handleDelete =
+  async (id) => {
+
+    try {
+
+      await api.delete(
+
+        `/documents/${id}`
+      );
+
+      toast.success(
+        "Document deleted"
+      );
+
+      fetchDocuments();
+
+    } catch (error) {
+
+      console.log(error);
+
+      toast.error(
+        "Delete failed"
+      );
+    }
+  };
+
+
   // LOGOUT
   const handleLogout = () => {
 
     logout();
+
+    navigate("/login");
   };
 
 
@@ -274,7 +310,9 @@ const Sidebar = () => {
           ? (
             <Loader2
               size={18}
-              className="animate-spin"
+              className="
+              animate-spin
+              "
             />
           )
           : (
@@ -328,18 +366,9 @@ const Sidebar = () => {
 
               documents.map((doc) => (
 
-                <a
+                <div
 
                   key={doc._id}
-
-                  href={
-                    doc.cloudinaryUrl
-                    || "#"
-                  }
-
-                  target="_blank"
-
-                  rel="noreferrer"
 
                   className="
                   bg-slate-800
@@ -349,31 +378,70 @@ const Sidebar = () => {
                   p-3
                   flex
                   items-center
+                  justify-between
                   gap-3
                   border
                   border-slate-700
-                  cursor-pointer
                   "
                 >
 
-                  <FileText
-                    size={18}
+                  <a
+
+                    href={
+                      doc.cloudinaryUrl
+                      || "#"
+                    }
+
+                    target="_blank"
+
+                    rel="noreferrer"
+
                     className="
-                    text-cyan-400
+                    flex
+                    items-center
+                    gap-3
+                    overflow-hidden
+                    flex-1
                     "
-                  />
+                  >
 
-                  <span className="
-                  text-sm
-                  truncate
-                  text-white
-                  ">
+                    <FileText
+                      size={18}
+                      className="
+                      text-cyan-400
+                      "
+                    />
 
-                    {doc.fileName}
+                    <span className="
+                    text-sm
+                    truncate
+                    text-white
+                    ">
 
-                  </span>
+                      {doc.fileName}
 
-                </a>
+                    </span>
+
+                  </a>
+
+                  <button
+
+                    onClick={() =>
+                      handleDelete(doc._id)
+                    }
+
+                    className="
+                    text-red-400
+                    hover:text-red-500
+                    transition
+                    "
+                  >
+
+                    <Trash2 size={16} />
+
+                  </button>
+
+                </div>
               ))
             )
           }
