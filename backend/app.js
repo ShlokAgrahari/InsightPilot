@@ -12,7 +12,7 @@ import authRouter from "./src/routes/authRoutes.js";
 
 import initWeaviate from "./src/services/initWeaviate.js";
 import documentRoutes from "./src/routes/documentRoutes.js";
-
+ 
 const app = express();
 
 connectDB();

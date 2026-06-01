@@ -1,7 +1,7 @@
 const chunkText = (
     text,
-    chunkSize = 800,
-    overlap = 150
+    chunkSize = 400,
+    overlap = 50
 ) => {
 
     const chunks = [];
