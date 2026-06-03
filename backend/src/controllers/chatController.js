@@ -26,7 +26,11 @@ async (req, res) => {
             query,
 
             userId:
-            req.user._id.toString()
+            req.user._id.toString(),
+
+            retryCount: 0,
+
+            answerValid: false
         });
 
         res.status(200).json({
