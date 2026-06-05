@@ -1,168 +1,118 @@
-import {
-  traceable
-} from "langsmith/traceable";
+import { traceable }
+from "langsmith/traceable";
 
-const WEB_KEYWORDS = [
-
-  "latest",
-  "today",
-  "current",
-  "recent",
-  "news",
-  "update",
-  "updated",
-  "2025",
-  "2026",
-  "trend",
-  "trending",
-  "pricing",
-  "release",
-  "released",
-  "announcement",
-  "market",
-  "stock",
-  "live",
-  "breaking"
-];
-
-const RETRIEVAL_KEYWORDS = [
-
-  "my",
-  "mine",
-  "uploaded",
-  "document",
-  "documents",
-  "pdf",
-  "resume",
-  "project",
-  "notes",
-  "report",
-  "assignment",
-  "research",
-  "file",
-  "presentation",
-  "ppt",
-  "proposal"
-];
+import groq from
+"../config/groq.js";
 
 const supervisorAgent = traceable(
 
-  async (state) => {
+    async (state) => {
 
-    console.log(
-      "Supervisor Agent Running"
-    );
+        console.log(
+            "Supervisor Agent Running"
+        );
 
-    const query =
-      state.query
-      ?.toLowerCase()
-      ?.trim() || "";
+        const query =
+            state.query;
 
-    let webScore = 0;
+        const prompt = `
 
-    let retrievalScore = 0;
+You are a routing agent.
 
-    // WEB SCORING
-    for (const keyword of WEB_KEYWORDS) {
+Given a user query, decide:
 
-      if (query.includes(keyword)) {
+1. Does it require document retrieval?
+2. Does it require web search?
 
-        webScore++;
-      }
+Return ONLY valid JSON:
+
+{
+  "useRetrieval": true,
+  "useWeb": false
+}
+
+Rules:
+
+- Questions about uploaded documents, resumes, PDFs, projects, reports, notes or files require retrieval.
+
+- Questions requiring recent information, news, trends, current events, latest releases or market updates require web search.
+
+- If both are needed, return both true.
+
+Examples:
+
+Query:
+"What is InsightPilot?"
+
+{
+  "useRetrieval": true,
+  "useWeb": false
+}
+
+Query:
+"What are the latest AI trends?"
+
+{
+  "useRetrieval": false,
+  "useWeb": true
+}
+
+Query:
+"Compare my InsightPilot project with current AI trends"
+
+{
+  "useRetrieval": true,
+  "useWeb": true
+}
+
+User Query:
+${query}
+
+`;
+
+        const response =
+            await groq.chat.completions.create({
+
+                model:
+                "llama-3.3-70b-versatile",
+
+                messages: [
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ],
+
+                temperature: 0
+            });
+
+        const content =
+            response.choices[0]
+            .message.content;
+
+        const decision =
+            JSON.parse(content);
+
+        console.log(
+            decision
+        );
+
+        return {
+
+            query,
+
+            useRetrieval:
+                decision.useRetrieval,
+
+            useWeb:
+                decision.useWeb
+        };
+    },
+
+    {
+        name:
+        "Supervisor Agent"
     }
-
-    // RETRIEVAL SCORING
-    for (const keyword of RETRIEVAL_KEYWORDS) {
-
-      if (query.includes(keyword)) {
-
-        retrievalScore++;
-      }
-    }
-
-    let useWeb = false;
-
-    let useRetrieval = false;
-
-    // DECISION LOGIC
-
-    // BOTH
-    if (
-      webScore > 0 &&
-      retrievalScore > 0
-    ) {
-
-      useWeb = true;
-
-      useRetrieval = true;
-    }
-
-    // ONLY WEB
-    else if (
-      webScore > 0
-    ) {
-
-      useWeb = true;
-    }
-
-    // ONLY RETRIEVAL
-    else if (
-      retrievalScore > 0
-    ) {
-
-      useRetrieval = true;
-    }
-
-    // DEFAULT FALLBACK
-    else {
-
-      useRetrieval = true;
-    }
-
-    console.log({
-
-      query,
-
-      webScore,
-
-      retrievalScore,
-
-      useWeb,
-
-      useRetrieval
-    });
-
-    return {
-
-      query,
-
-      useWeb,
-
-      useRetrieval,
-
-      routingMetadata: {
-
-        webScore,
-
-        retrievalScore,
-
-        routeChosen:
-
-          useWeb && useRetrieval
-            ? "hybrid"
-
-          : useWeb
-            ? "web"
-
-          : "retrieval"
-      }
-    };
-  },
-
-  {
-    name:
-      "Supervisor Agent"
-  }
 );
 
 export default supervisorAgent;

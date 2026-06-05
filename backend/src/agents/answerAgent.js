@@ -6,11 +6,14 @@ import generateAnswer from
 "../services/generateAnswer.js";
 
 const answerAgent = traceable(
-
+    
     async (
         state
     ) => {
-
+        console.log(
+    "CHAT HISTORY:",
+    state.chatHistory
+);
         console.log(
             "Answer Agent Running"
         );
@@ -20,12 +23,15 @@ const answerAgent = traceable(
 
                 state.query,
 
-                state.rerankedChunks
+                state.rerankedChunks,
+
+                state.chatHistory || []
             );
 
         return {
 
-            finalAnswer: answer
+            finalAnswer:
+                answer
         };
     },
 

@@ -5,11 +5,24 @@ const generateAnswer = async (
 
     query,
 
-    chunks
+    chunks,
+
+    chatHistory = []
 
 ) => {
 
     try {
+
+        const conversationHistory =
+
+            chatHistory.map(
+
+                item =>
+
+`${item.role.toUpperCase()}:
+${item.content}`
+
+            ).join("\n\n");
 
         const internalDocs =
             chunks.filter(
@@ -53,6 +66,14 @@ ${item.properties.text}`
 
 You are an AI research assistant.
 
+Use the previous conversation to understand follow-up questions.
+
+PREVIOUS CONVERSATION:
+
+${conversationHistory}
+
+================================
+
 Use BOTH:
 1. Internal documents
 2. Web results
@@ -63,19 +84,35 @@ If comparison is requested,
 analyze both carefully.
 
 INTERNAL DOCUMENTS:
+
 ${internalContext}
 
 WEB RESULTS:
+
 ${webContext}
 
 QUESTION:
+
 ${query}
 
 Instructions:
+
+- Understand references such as:
+  "it"
+  "that project"
+  "the platform"
+  using previous conversation.
+
 - Give detailed answer
+
 - Use citations
+
 - Compare intelligently
+
 - Do not hallucinate
+
+- Use only provided context
+
 `;
 
         const response =
