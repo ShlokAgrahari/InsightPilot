@@ -1,43 +1,35 @@
-import {
-    traceable
-} from "langsmith/traceable";
+import { traceable } from "langsmith/traceable";
 
 const memoryAgent = traceable(
 
-    async (
-        state
-    ) => {
+    async (state) => {
 
-        console.log(
-            "Memory Agent Running"
-        );
-
-        const previousHistory =
+        const history =
             state.chatHistory || [];
 
         const updatedHistory = [
 
-            ...previousHistory,
+            ...history,
 
             {
-                query:
-                    state.query,
+                role: "user",
+                content: state.query
+            },
 
-                answer:
-                    state.finalAnswer
+            {
+                role: "assistant",
+                content: state.finalAnswer
             }
-        ];
+
+        ].slice(-8);
 
         return {
-
-            chatHistory:
-                updatedHistory
+            chatHistory: updatedHistory
         };
     },
 
     {
-        name:
-            "Memory Agent"
+        name: "Memory Agent"
     }
 );
 

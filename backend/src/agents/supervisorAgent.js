@@ -62,7 +62,6 @@ const supervisorAgent = traceable(
 
     let retrievalScore = 0;
 
-    // WEB SCORING
     for (const keyword of WEB_KEYWORDS) {
 
       if (query.includes(keyword)) {
@@ -71,7 +70,6 @@ const supervisorAgent = traceable(
       }
     }
 
-    // RETRIEVAL SCORING
     for (const keyword of RETRIEVAL_KEYWORDS) {
 
       if (query.includes(keyword)) {
@@ -84,9 +82,6 @@ const supervisorAgent = traceable(
 
     let useRetrieval = false;
 
-    // DECISION LOGIC
-
-    // BOTH
     if (
       webScore > 0 &&
       retrievalScore > 0
@@ -105,7 +100,6 @@ const supervisorAgent = traceable(
       useWeb = true;
     }
 
-    // ONLY RETRIEVAL
     else if (
       retrievalScore > 0
     ) {
@@ -113,7 +107,6 @@ const supervisorAgent = traceable(
       useRetrieval = true;
     }
 
-    // DEFAULT FALLBACK
     else {
 
       useRetrieval = true;

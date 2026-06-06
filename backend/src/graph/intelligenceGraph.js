@@ -31,6 +31,10 @@ import citationValidatorAgent from
 import memoryAgent from
 "../agents/memoryAgent.js";
 
+import { MemorySaver } from "@langchain/langgraph";
+
+const checkpointer = new MemorySaver();
+
 const workflow = new StateGraph({
 
     channels: {
@@ -51,7 +55,11 @@ const workflow = new StateGraph({
 
         finalAnswer: null,
 
-        chatHistory: null,
+        chatHistory: {
+            value: (x, y) => y,
+            default: () => []
+        },
+
 
         userId: null
     }
@@ -177,7 +185,8 @@ workflow.addEdge(
     END
 );
 
-const graph =
-    workflow.compile();
+const graph = workflow.compile({
+    checkpointer
+});
 
 export default graph;

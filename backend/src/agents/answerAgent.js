@@ -14,14 +14,16 @@ const answerAgent = traceable(
         console.log(
             "Answer Agent Running"
         );
-
+        console.log(
+    "History Length:",
+    state.chatHistory?.length || 0
+);
         const answer =
             await generateAnswer(
-
-                state.query,
-
-                state.rerankedChunks
-            );
+    state.query,
+    state.rerankedChunks,
+    state.chatHistory || []
+);
 
         return {
 

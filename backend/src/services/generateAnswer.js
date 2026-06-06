@@ -5,7 +5,9 @@ const generateAnswer = async (
 
     query,
 
-    chunks
+    chunks,
+
+    history = []
 
 ) => {
 
@@ -49,6 +51,19 @@ ${item.properties.text}`
 
             ).join("\n\n");
 
+        const previousConversation =
+            history.length > 0
+
+                ? history.map(
+
+                    (item) =>
+
+                        `${item.role}: ${item.content}`
+
+                ).join("\n")
+
+                : "No previous conversation.";
+
         const prompt = `
 
 You are an AI research assistant.
@@ -61,6 +76,9 @@ when relevant.
 
 If comparison is requested,
 analyze both carefully.
+
+PREVIOUS CONVERSATION:
+${previousConversation}
 
 INTERNAL DOCUMENTS:
 ${internalContext}
@@ -76,6 +94,10 @@ Instructions:
 - Use citations
 - Compare intelligently
 - Do not hallucinate
+- Use previous conversation when relevant
+- If the user refers to earlier messages, use the conversation history
+- If the current question depends on context from previous chats, incorporate it naturally
+- Do not invent information that does not exist in the conversation history
 `;
 
         const response =

@@ -20,14 +20,26 @@ async (req, res) => {
             });
         }
 
+        const userId =
+            req.user._id.toString();
+
         const result =
-        await graph.invoke({
+            await graph.invoke(
 
-            query,
+                {
+                    query,
 
-            userId:
-            req.user._id.toString()
-        });
+                    userId
+                },
+
+                {
+                    configurable: {
+
+                        thread_id:
+                            userId
+                    }
+                }
+            );
 
         res.status(200).json({
 
@@ -59,46 +71,54 @@ async (req, res) => {
 
                 {
                     agent:
-                    "Supervisor Agent",
+                        "Supervisor Agent",
 
                     status:
-                    "completed"
+                        "completed"
                 },
 
                 {
                     agent:
-                    "Retrieval Agent",
+                        "Retrieval Agent",
 
                     status:
-                    result.retrievedChunks
-                    ? "completed"
-                    : "skipped"
+                        result.retrievedChunks
+                            ? "completed"
+                            : "skipped"
                 },
 
                 {
                     agent:
-                    "Web Agent",
+                        "Web Agent",
 
                     status:
-                    result.webResults
-                    ? "completed"
-                    : "skipped"
+                        result.webResults
+                            ? "completed"
+                            : "skipped"
                 },
 
                 {
                     agent:
-                    "Reflection Agent",
+                        "Reflection Agent",
 
                     status:
-                    "completed"
+                        "completed"
                 },
 
                 {
                     agent:
-                    "Citation Validator",
+                        "Citation Validator",
 
                     status:
-                    "completed"
+                        "completed"
+                },
+
+                {
+                    agent:
+                        "Memory Agent",
+
+                    status:
+                        "completed"
                 }
             ]
         });
