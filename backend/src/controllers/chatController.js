@@ -1,6 +1,9 @@
 import graph from
 "../graph/intelligenceGraph.js";
 
+import ChatHistory from
+"../models/ChatHistory.js";
+
 export const chatWithDocs =
 async (req, res) => {
 
@@ -20,26 +23,76 @@ async (req, res) => {
             });
         }
 
-        const userId =
-            req.user._id.toString();
+        const history =
+            await ChatHistory.find({
+
+                userId:
+                    req.user._id
+
+            })
+
+            .sort({
+
+                createdAt: 1
+
+            })
+
+            .limit(10);
+console.log(history);
+        const chatHistory =
+            history.map(
+
+                item => ({
+
+                    role:
+                        item.role,
+
+                    content:
+                        item.content
+                })
+            );
 
         const result =
-            await graph.invoke(
+            await graph.invoke({
 
-                {
-                    query,
+                query,
 
-                    userId
-                },
+                userId:
+                    req.user._id.toString(),
 
-                {
-                    configurable: {
+                chatHistory,
 
-                        thread_id:
-                            userId
-                    }
-                }
-            );
+                retryCount: 0,
+
+                answerValid: false
+            });
+
+        await ChatHistory.insertMany([
+
+            {
+
+                userId:
+                    req.user._id,
+
+                role:
+                    "user",
+
+                content:
+                    query
+            },
+
+            {
+
+                userId:
+                    req.user._id,
+
+                role:
+                    "assistant",
+
+                content:
+                    result.finalAnswer
+            }
+        ]);
 
         res.status(200).json({
 
@@ -62,6 +115,7 @@ async (req, res) => {
                         text:
                             item.properties.text
                     })
+
                 ) || [],
 
             webResults:
@@ -99,6 +153,14 @@ async (req, res) => {
 
                 {
                     agent:
+                        "Retry Agent",
+
+                    status:
+                        "completed"
+                },
+
+                {
+                    agent:
                         "Reflection Agent",
 
                     status:
@@ -108,14 +170,6 @@ async (req, res) => {
                 {
                     agent:
                         "Citation Validator",
-
-                    status:
-                        "completed"
-                },
-
-                {
-                    agent:
-                        "Memory Agent",
 
                     status:
                         "completed"

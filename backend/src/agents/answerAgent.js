@@ -6,28 +6,32 @@ import generateAnswer from
 "../services/generateAnswer.js";
 
 const answerAgent = traceable(
-
+    
     async (
         state
     ) => {
-
+        console.log(
+    "CHAT HISTORY:",
+    state.chatHistory
+);
         console.log(
             "Answer Agent Running"
         );
-        console.log(
-    "History Length:",
-    state.chatHistory?.length || 0
-);
+
         const answer =
             await generateAnswer(
-    state.query,
-    state.rerankedChunks,
-    state.chatHistory || []
-);
+
+                state.query,
+
+                state.rerankedChunks,
+
+                state.chatHistory || []
+            );
 
         return {
 
-            finalAnswer: answer
+            finalAnswer:
+                answer
         };
     },
 

@@ -22,6 +22,9 @@ import rerankerAgentNode from
 import answerAgent from
 "../agents/answerAgent.js";
 
+import retryAgent from
+"../agents/retryAgent.js";
+
 import reflectionAgent from
 "../agents/reflectionAgent.js";
 
@@ -61,7 +64,13 @@ const workflow = new StateGraph({
         },
 
 
-        userId: null
+        userId: null,
+
+        retryCount: null,
+
+        answerValid: null,
+
+        retryReason: null
     }
 });
 
@@ -93,6 +102,11 @@ workflow.addNode(
 workflow.addNode(
     "answer",
     answerAgent
+);
+
+workflow.addNode(
+    "retry",
+    retryAgent
 );
 
 workflow.addNode(
@@ -132,7 +146,9 @@ workflow.addConditionalEdges(
             ];
         }
 
-        if (state.useWeb) {
+        if (
+            state.useWeb
+        ) {
 
             return [
                 "web"
@@ -167,7 +183,27 @@ workflow.addEdge(
 
 workflow.addEdge(
     "answer",
-    "reflection"
+    "retry"
+);
+
+workflow.addConditionalEdges(
+
+    "retry",
+
+    (state) => {
+
+        if (
+
+            !state.answerValid &&
+
+            state.retryCount < 2
+        ) {
+
+            return "answer";
+        }
+
+        return "reflection";
+    }
 );
 
 workflow.addEdge(

@@ -7,11 +7,22 @@ const generateAnswer = async (
 
     chunks,
 
-    history = []
+    chatHistory = []
 
 ) => {
 
     try {
+
+        const conversationHistory =
+
+            chatHistory.map(
+
+                item =>
+
+`${item.role.toUpperCase()}:
+${item.content}`
+
+            ).join("\n\n");
 
         const internalDocs =
             chunks.filter(
@@ -51,22 +62,17 @@ ${item.properties.text}`
 
             ).join("\n\n");
 
-        const previousConversation =
-            history.length > 0
-
-                ? history.map(
-
-                    (item) =>
-
-                        `${item.role}: ${item.content}`
-
-                ).join("\n")
-
-                : "No previous conversation.";
-
         const prompt = `
 
 You are an AI research assistant.
+
+Use the previous conversation to understand follow-up questions.
+
+PREVIOUS CONVERSATION:
+
+${conversationHistory}
+
+================================
 
 Use BOTH:
 1. Internal documents
@@ -77,27 +83,36 @@ when relevant.
 If comparison is requested,
 analyze both carefully.
 
-PREVIOUS CONVERSATION:
-${previousConversation}
-
 INTERNAL DOCUMENTS:
+
 ${internalContext}
 
 WEB RESULTS:
+
 ${webContext}
 
 QUESTION:
+
 ${query}
 
 Instructions:
+
+- Understand references such as:
+  "it"
+  "that project"
+  "the platform"
+  using previous conversation.
+
 - Give detailed answer
+
 - Use citations
+
 - Compare intelligently
+
 - Do not hallucinate
-- Use previous conversation when relevant
-- If the user refers to earlier messages, use the conversation history
-- If the current question depends on context from previous chats, incorporate it naturally
-- Do not invent information that does not exist in the conversation history
+
+- Use only provided context
+
 `;
 
         const response =
