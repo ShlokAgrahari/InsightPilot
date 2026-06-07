@@ -1,36 +1,42 @@
 import { pipeline } from "@xenova/transformers";
+import { traceable } from "langsmith/traceable";
 
 let extractor;
 
-const embedText = async (text) => {
+const embedText = traceable(
+    async (text) => {
 
-    if (!extractor) {
+        if (!extractor) {
 
-        console.log(
-            "Loading multilingual embedding model..."
-        );
+            console.log(
+                "Loading multilingual embedding model..."
+            );
 
-        extractor = await pipeline(
-            "feature-extraction",
-            "Xenova/paraphrase-multilingual-MiniLM-L12-v2"
-        );
+            extractor = await pipeline(
+                "feature-extraction",
+                "Xenova/paraphrase-multilingual-MiniLM-L12-v2"
+            );
 
-        console.log(
-            "Multilingual model loaded"
-        );
-    }
-
-    const output = await extractor(
-        text,
-        {
-            pooling: "mean",
-            normalize: true
+            console.log(
+                "Multilingual model loaded"
+            );
         }
-    );
 
-    return Array.from(
-        output.data
-    );
-};
+        const output = await extractor(
+            text,
+            {
+                pooling: "mean",
+                normalize: true
+            }
+        );
+
+        return Array.from(
+            output.data
+        );
+    },
+    {
+        name: "embed-text service"
+    }
+);
 
 export default embedText;
