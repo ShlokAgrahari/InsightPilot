@@ -7,6 +7,9 @@ import {
 import supervisorAgent from
 "../agents/supervisorAgent.js";
 
+import queryExpansionAgent from
+"../agents/queryExpansionAgent.js";
+
 import retrievalAgent from
 "../agents/retrievalAgent.js";
 
@@ -40,6 +43,8 @@ const workflow = new StateGraph({
 
         query: null,
 
+        expandedQueries: null,
+
         useWeb: null,
 
         useRetrieval: null,
@@ -69,6 +74,11 @@ const workflow = new StateGraph({
 workflow.addNode(
     "supervisor",
     supervisorAgent
+);
+
+workflow.addNode(
+    "queryExpansion",
+    queryExpansionAgent
 );
 
 workflow.addNode(
@@ -121,9 +131,14 @@ workflow.addEdge(
     "supervisor"
 );
 
+workflow.addEdge(
+    "supervisor",
+    "queryExpansion"
+);
+
 workflow.addConditionalEdges(
 
-    "supervisor",
+    "queryExpansion",
 
     (state) => {
 

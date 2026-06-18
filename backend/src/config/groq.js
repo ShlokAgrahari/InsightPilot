@@ -1,3 +1,5 @@
+import { ChatGroq } from "@langchain/groq";
+
 import Groq from "groq-sdk";
 
 const groq = new Groq({
