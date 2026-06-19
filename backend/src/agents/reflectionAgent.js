@@ -1,21 +1,45 @@
-import {
-    traceable
-} from "langsmith/traceable";
-
+import { traceable } from "langsmith/traceable";
 import groq from "../config/groq.js";
 
+/**
+ * Traced Reflection LLM
+ */
+const reflectionLLM = traceable(
+  async (prompt) => {
+    const response = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0.1,
+    });
+
+    console.log(
+      "Reflection LLM Usage:",
+      response.usage
+    );
+
+    return response;
+  },
+  {
+    name: "Reflection LLM",
+    run_type: "llm",
+  }
+);
+
+/**
+ * Reflection Agent
+ */
 const reflectionAgent = traceable(
+  async (state, context) => {
+    console.log(
+      "Reflection Agent Running"
+    );
 
-    async (
-        state,
-        context
-    ) => {
-
-        console.log(
-            "Reflection Agent Running"
-        );
-
-        const prompt = `
+    const prompt = `
 
 You are an elite AI response refinement agent for a RAG system.
 
@@ -65,33 +89,22 @@ ${state.finalAnswer}
 
 `;
 
-        const response =
-            await groq.chat.completions.create({
+    const response = await reflectionLLM(
+      prompt
+    );
 
-                model:
-                    "llama-3.3-70b-versatile",
+    const finalAnswer =
+      response.choices[0]
+        .message.content;
 
-                messages: [
-                    {
-                        role: "user",
-                        content: prompt
-                    }
-                ],
-
-                temperature: 0.1
-            });
-
-        return {
-            finalAnswer:
-                response.choices[0]
-                    .message.content
-        };
-    },
-
-    {
-        name:
-            "Reflection Agent"
-    }
+    return {
+      finalAnswer,
+    };
+  },
+  {
+    name: "Reflection Agent",
+    run_type: "chain",
+  }
 );
 
 export default reflectionAgent;

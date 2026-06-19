@@ -1,22 +1,38 @@
-import { traceable }
-from "langsmith/traceable";
+import { traceable } from "langsmith/traceable";
+import groq from "../config/groq.js";
 
-import groq from
-"../config/groq.js";
+/**
+ * Traced LLM call
+ */
+const routerLLM = traceable(
+  async (prompt) => {
+    return await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0,
+    });
+  },
+  {
+    name: "Groq Router LLM",
+    run_type: "llm",
+  }
+);
 
+/**
+ * Supervisor Agent
+ */
 const supervisorAgent = traceable(
+  async (state) => {
+    console.log("Supervisor Agent Running");
 
-    async (state) => {
+    const query = state.query;
 
-        console.log(
-            "Supervisor Agent Running"
-        );
-
-        const query =
-            state.query;
-
-        const prompt = `
-
+    const prompt = `
 You are a routing agent.
 
 Given a user query, decide:
@@ -67,52 +83,39 @@ Query:
 
 User Query:
 ${query}
-
 `;
 
-        const response =
-            await groq.chat.completions.create({
+    const response = await routerLLM(prompt);
 
-                model:
-                "llama-3.3-70b-versatile",
+    console.log(response.usage);
 
-                messages: [
-                    {
-                        role: "user",
-                        content: prompt
-                    }
-                ],
+    const content = response.choices[0].message.content;
 
-                temperature: 0
-            });
+    let decision;
 
-        const content =
-            response.choices[0]
-            .message.content;
+    try {
+      decision = JSON.parse(content);
+    } catch (err) {
+      console.error("Failed to parse LLM response:", content);
 
-        const decision =
-            JSON.parse(content);
-
-        console.log(
-            decision
-        );
-
-        return {
-
-            query,
-
-            useRetrieval:
-                decision.useRetrieval,
-
-            useWeb:
-                decision.useWeb
-        };
-    },
-
-    {
-        name:
-        "Supervisor Agent"
+      decision = {
+        useRetrieval: false,
+        useWeb: false,
+      };
     }
+
+    console.log("Routing Decision:", decision);
+
+    return {
+      query,
+      useRetrieval: Boolean(decision.useRetrieval),
+      useWeb: Boolean(decision.useWeb),
+    };
+  },
+  {
+    name: "Supervisor Agent",
+  
+  }
 );
 
 export default supervisorAgent;

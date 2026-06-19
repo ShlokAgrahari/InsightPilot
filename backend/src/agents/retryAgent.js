@@ -1,27 +1,44 @@
-import { traceable }
-from "langsmith/traceable";
+import { traceable } from "langsmith/traceable";
+import groq from "../config/groq.js";
 
-import groq from
-"../config/groq.js";
+/**
+ * Traced LLM Call
+ */
+const retryLLM = traceable(
+  async (prompt) => {
+    const response = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0,
+    });
 
+    console.log("Retry LLM Usage:", response.usage);
+
+    return response;
+  },
+  {
+    name: "Retry Evaluator LLM",
+    run_type: "llm",
+  }
+);
+
+/**
+ * Retry Agent
+ */
 const retryAgent = traceable(
-    
-    async (state) => {
+  async (state) => {
+    console.log("Retry Agent Running");
 
-        console.log(
-            "Retry Agent Running"
-        );
+    const context = (state.rerankedChunks || [])
+      .map((chunk) => chunk.properties.text)
+      .join("\n\n");
 
-        const context =
-            state.rerankedChunks
-                .map(
-                    chunk =>
-                    chunk.properties.text
-                )
-                .join("\n\n");
-
-        const prompt = `
-
+    const prompt = `
 You are an answer evaluator.
 
 Question:
@@ -46,49 +63,27 @@ VALID
 or
 
 INVALID
-
 `;
 
-        const response =
-            await groq.chat.completions.create({
+    const response = await retryLLM(prompt);
 
-                model:
-                "llama-3.3-70b-versatile",
+    const result = response.choices[0].message.content.trim();
 
-                messages: [
-                    {
-                        role: "user",
-                        content: prompt
-                    }
-                ],
+    console.log("Retry Evaluation:", result);
 
-                temperature: 0
-            });
+    return {
+      answerValid: result === "VALID",
 
-        const result =
-            response.choices[0]
-            .message.content
-            .trim();
-
-        return {
-
-            answerValid:
-                result === "VALID",
-
-            retryCount:
-
-                result === "VALID"
-
-                ? state.retryCount || 0
-
-                : (state.retryCount || 0) + 1
-        };
-    },
-
-    {
-        name:
-            "Retry Agent"
-    }
+      retryCount:
+        result === "VALID"
+          ? state.retryCount || 0
+          : (state.retryCount || 0) + 1,
+    };
+  },
+  {
+    name: "Retry Agent",
+    run_type: "chain",
+  }
 );
 
 export default retryAgent;
