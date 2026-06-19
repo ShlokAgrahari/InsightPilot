@@ -1,30 +1,53 @@
-import {
-    traceable
-} from "langsmith/traceable";
+import { traceable } from "langsmith/traceable";
+import groq from "../config/groq.js";
 
-import groq from
-"../config/groq.js";
+/**
+ * Traced Citation Validation LLM
+ */
+const citationValidatorLLM = traceable(
+  async (prompt) => {
+    const response = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0.2,
+    });
 
-const citationValidatorAgent =
-traceable(
+    console.log(
+      "Citation Validator Usage:",
+      response.usage
+    );
 
-    async (state) => {
+    return response;
+  },
+  {
+    name: "Citation Validator LLM",
+    run_type: "llm",
+  }
+);
 
-        console.log(
-            "Citation Validator Running"
-        );
+/**
+ * Citation Validator Agent
+ */
+const citationValidatorAgent = traceable(
+  async (state) => {
+    console.log(
+      "Citation Validator Running"
+    );
 
-        const context =
-            state.rerankedChunks.map(
-
-                (item, index) =>
-
-                    `[C${index + 1}]
+    const context = state.rerankedChunks
+      .map(
+        (item, index) =>
+          `[C${index + 1}]
 ${item.properties.text}`
+      )
+      .join("\n\n");
 
-            ).join("\n\n");
-
-        const prompt = `
+    const prompt = `
 
 You are an AI citation validator.
 
@@ -45,39 +68,26 @@ ${context}
 
 ANSWER:
 ${state.finalAnswer}
+
 `;
 
-        const response =
-            await groq.chat.completions.create({
+    const response =
+      await citationValidatorLLM(
+        prompt
+      );
 
-                model:
-                "llama-3.3-70b-versatile",
+    const finalAnswer =
+      response.choices[0]
+        .message.content;
 
-                messages: [
-
-                    {
-                        role: "user",
-
-                        content: prompt
-                    }
-                ],
-
-                temperature: 0.2
-            });
-
-        return {
-
-            finalAnswer:
-                response.choices[0]
-                .message.content
-        };
-    },
-
-    {
-        name:
-            "Citation Validator Agent"
-    }
+    return {
+      finalAnswer,
+    };
+  },
+  {
+    name: "Citation Validator Agent",
+    run_type: "chain",
+  }
 );
 
-export default
-citationValidatorAgent;
+export default citationValidatorAgent;

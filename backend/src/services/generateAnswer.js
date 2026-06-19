@@ -1,13 +1,55 @@
 import groq from "../config/groq.js";
 import { traceable } from "langsmith/traceable";
 
+/**
+ * Traced LLM Call
+ */
+const answerLLM = traceable(
+    async (prompt) => {
+
+        const response =
+            await groq.chat.completions.create({
+
+                model:
+                    "llama-3.3-70b-versatile",
+
+                messages: [
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ],
+
+                temperature: 0.3
+            });
+
+        console.log(
+            "Answer LLM Usage:",
+            response.usage
+        );
+
+        return response;
+    },
+
+    {
+        name:
+            "Answer LLM",
+
+        run_type:
+            "llm"
+    }
+);
+
 const generateAnswer = traceable(
+
     async (
         query,
         chunks,
         chatHistory = []
     ) => {
+
         try {
+
             const conversationHistory =
                 chatHistory.map(
                     item =>
@@ -19,31 +61,31 @@ ${item.content}`
                 chunks.filter(
                     (item) =>
                         item.properties
-                        .source !== "web"
+                            .source !== "web"
                 );
 
             const webDocs =
                 chunks.filter(
                     (item) =>
                         item.properties
-                        .source === "web"
+                            .source === "web"
                 );
 
             const internalContext =
                 internalDocs.map(
                     (item, index) =>
-                        `[C${index + 1}]
+`[C${index + 1}]
 ${item.properties.text}`
                 ).join("\n\n");
 
             const webContext =
                 webDocs.map(
                     (item, index) =>
-                        `[W${index + 1}]
+`[W${index + 1}]
 ${item.properties.text}`
                 ).join("\n\n");
 
-           const prompt = `
+            const prompt = `
 You are an intelligent AI assistant with access to:
 
 1. Previous conversation history
@@ -93,7 +135,6 @@ REASONING RULES
 
 3. Treat information explicitly provided by the user in previous messages as conversational facts unless corrected later.
 
-
 4. If the current question depends on earlier messages, answer using those messages even when the answer is not present in retrieved documents.
 
 5. Use retrieved documents only when they are relevant.
@@ -135,31 +176,29 @@ REASONING RULES
 ANSWER
 ==============================
 `;
+
             const response =
-                await groq.chat.completions.create({
-                    model:
-                        "llama-3.3-70b-versatile",
-
-                    messages: [
-                        {
-                            role: "user",
-                            content: prompt
-                        }
-                    ],
-
-                    temperature: 0.3
-                });
+                await answerLLM(
+                    prompt
+                );
 
             return response.choices[0]
                 .message.content;
 
         } catch (error) {
+
             console.log(error);
+
             throw error;
         }
     },
+
     {
-        name: "generate answer service"
+        name:
+            "generate answer service",
+
+        run_type:
+            "chain"
     }
 );
 
