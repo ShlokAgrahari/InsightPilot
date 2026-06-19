@@ -66,7 +66,10 @@ console.log(history);
 
                 answerValid: false
             });
-
+console.log(
+    "WEB RESULTS:",
+    result.webResults
+);
         await ChatHistory.insertMany([
 
             {
@@ -120,7 +123,7 @@ console.log(history);
 
             webResults:
                 result.webResults,
-
+            
             agentLogs: [
 
                 {
